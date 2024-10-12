@@ -7,7 +7,7 @@ from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 from datetime import datetime
 
-data = pd.read_csv('C:\\Users\\aport\\OneDrive\\Documents\\School\\Fall Semester 2024\\Telling Stories w Data\\dashboard-assignment\\query-results.txt'
+data = pd.read_csv('query-results.txt'
                    ,sep = '\t', on_bad_lines = 'skip')
 data.loc[data['state'] == 'Sport Utility 4D']
 data.drop(12433,axis = 0,inplace= True)
