@@ -25,12 +25,16 @@ data['time_posted'] = pd.to_datetime(data['time_posted'],unit = 's')
 data['time_posted'] = data['time_posted'].apply(lambda x: x.strftime("%Y-%m-%d"))
 unique_states = data.drop_duplicates(subset = ['state'])['state']
 unique_cities = data.drop_duplicates(subset= ['location'])['location']
+
 state_options = [{'label': f"{state}", 'value': f"{state}"} for state in unique_states.values]
 
 state_options.insert(0, {'label': 'All States', 'value': 'All'})
 cities_options =  data.drop_duplicates(subset=['location', 'state'])[['location', 'state']]
 
-car_options = data.drop_duplicates(subset='make')
+unique_cars = data.drop_duplicates(subset='make')['make']
+
+car_options = [{'label':f'{car}','value':f'{car}'} for car in unique_cars.values]
+
 car_options.insert(0,{'label':'All Makes','value':'All'})
 
 app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -42,7 +46,7 @@ app.layout = html.Div([
                        multi = True),
             dcc.Dropdown(id = 'city-dropdown',
                          options = [],
-                         value = ['All'],
+                         value = [],
                          multi = True),
  
                dcc.Dropdown(
@@ -63,16 +67,16 @@ app.layout = html.Div([
                 ),
 
                 dcc.Dropdown(id = 'make-dropdown',
-                    options = [{'label':make,'value':make}for make in car_options['make']],
+                    options = car_options,
                     value = ['All'],
                     multi = True),
 
                 dcc.Slider(id = 'price-slider',
-                    min = data['price'].min(),
+                    min = 0,
                     max = data['price'].max(),
                     step = 500,
                     value = data['price'].max(),
-                    marks = {i:f"{i}" for i in range(int(data['price'].min()),int(data['price'].max()),10000)},
+                    marks = {i:f"{i}" for i in range(int(0),int(data['price'].max()),5000)},
                     tooltip={'placement':'bottom','always_visible': True}),
                 
 
@@ -100,7 +104,7 @@ def update_city_dropdown(selected_states):
         filtered_locations = cities_options[cities_options['state'].isin(selected_states)]
     
     city_options = [{'label': loc, 'value': loc} for loc in filtered_locations['location'].unique()]
-    city_options.insert(0, {'label': 'All Locations', 'value': 'All'})
+   
     
     return city_options
 
