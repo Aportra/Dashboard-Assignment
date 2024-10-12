@@ -223,6 +223,7 @@ def update_tab_content(active_tab, selected_states, selected_cities, selected_pr
                                                   y=median_price_over_time['price'],
                                                   mode='lines',
                                                   name=f'{make} Median Price'))
+            median_price_fig.update_layout(title = 'Median Price Over Time')
 
 
         filtered_cars['log_odometer'] = np.log1p(filtered_cars['odometer'])
