@@ -182,4 +182,6 @@ def update_tab_content(active_tab, selected_states, selected_cities, selected_pr
     return None
 
 if __name__ == '__main__':
-    app.run_server()
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run_server(host='0.0.0.0', port=port, debug=False)
