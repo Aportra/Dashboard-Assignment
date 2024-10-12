@@ -8,6 +8,9 @@ import dash_bootstrap_components as dbc
 from datetime import datetime
 import numpy as np
 
+
+#Data cleaning and prep
+
 data = pd.read_csv('query-results.txt',sep = '\t', on_bad_lines = 'skip')
 
 data.loc[data['state'] == 'Sport Utility 4D']
@@ -38,6 +41,9 @@ car_options = [{'label':f'{car}','value':f'{car}'} for car in unique_cars.values
 
 car_options.insert(0,{'label':'All Makes','value':'All'})
 
+
+
+#Building with Dash
 app = dash.Dash(__name__,external_stylesheets=[dbc.themes.FLATLY])
 app.layout = html.Div([
      dcc.Store(id = 'filtered-cars-store'),
@@ -111,22 +117,27 @@ app.layout = html.Div([
 ])
 
 
+#Adding filtering for cities; needed to be separate because we are passing in the selected state before returning.
+
 @app.callback(
     Output(component_id='city-dropdown', component_property='options'),
     Input(component_id='state-dropdown', component_property='value')
 )
 def update_city_dropdown(selected_states):
     if 'All' in selected_states:
-        # If "All" is selected, show all locations
+
         filtered_locations = cities_options
     else:
-        # Filter unique locations based on the selected states
+
         filtered_locations = cities_options[cities_options['state'].isin(selected_states)]
     
     city_options = [{'label': loc, 'value': loc} for loc in filtered_locations['location'].unique()]
    
     
     return city_options
+
+
+#Adding filtering for everything else
 
 @app.callback(
     [Output('tab-content', 'children'), Output('filtered-cars-store', 'data')],
@@ -141,7 +152,7 @@ def update_city_dropdown(selected_states):
      Input('year-slider', 'value')]
 )
 def update_tab_content(active_tab, selected_states, selected_cities, selected_price, sort_order, time_order, selected_makes, odometer_order, year_order):
-    # Filter the data based on selected state, city, and price range
+
     min_price, max_price = selected_price
     min_year, max_year = year_order
     min_od, max_od = odometer_order
@@ -159,10 +170,9 @@ def update_tab_content(active_tab, selected_states, selected_cities, selected_pr
     if 'All' not in selected_makes and selected_makes:
         filtered_cars = filtered_cars[filtered_cars['make'].isin(selected_makes)]
     
-    # Sort the data based on the selected sort order
+
     filtered_cars = filtered_cars.sort_values(by='price', ascending=(sort_order == 'ascending'))
 
-    # Sort data based on time_posted
     filtered_cars = filtered_cars.sort_values(by='time_posted', ascending=(time_order == 'ascending'))
     
     filtered_cars_data = filtered_cars.drop(columns_to_drop, axis=1)
@@ -180,7 +190,7 @@ def update_tab_content(active_tab, selected_states, selected_cities, selected_pr
           ), filtered_cars.to_dict('records')
 
     elif active_tab == 'tab-map':
-        # Create a map of car listings using Plotly Scattermapbox
+
         map_fig = go.Figure(go.Scattermapbox(
             lat=filtered_cars['latitude'],
             lon=filtered_cars['longitude'],
@@ -204,7 +214,7 @@ def update_tab_content(active_tab, selected_states, selected_cities, selected_pr
         return dcc.Graph(id='car-map', figure=map_fig), filtered_cars.to_dict('records')
 
     elif active_tab == 'tab-analysis':
-        # Median Price Over Time per Make
+
         median_price_fig = go.Figure()
         for make in filtered_cars['make'].unique():
             make_data = filtered_cars[filtered_cars['make'] == make]
@@ -214,7 +224,7 @@ def update_tab_content(active_tab, selected_states, selected_cities, selected_pr
                                                   mode='lines',
                                                   name=f'{make} Median Price'))
 
-        # Price vs Log Odometer Scatter Plot
+
         filtered_cars['log_odometer'] = np.log1p(filtered_cars['odometer'])
         price_vs_odometer_fig = go.Figure(go.Scatter(
             x=filtered_cars['log_odometer'],
@@ -227,7 +237,7 @@ def update_tab_content(active_tab, selected_states, selected_cities, selected_pr
                                             xaxis_title="Log(Odometer)",
                                             yaxis_title="Price")
 
-        # Count of Listings by Make
+
         make_counts = filtered_cars['make'].value_counts().reset_index()
         make_counts.columns = ['make', 'count']
         make_count_fig = go.Figure(go.Bar(
@@ -251,5 +261,3 @@ if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run_server(host='0.0.0.0', port=port, debug=False)
-
-
