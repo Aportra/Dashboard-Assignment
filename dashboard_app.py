@@ -31,6 +31,8 @@ state_options.insert(0, {'label': 'All States', 'value': 'All'})
 cities_options =  data.drop_duplicates(subset=['location', 'state'])[['location', 'state']]
 
 car_options = data.drop_duplicates(subset='make')
+car_options.insert(0,{'label':'All Makes','value':'All'})
+
 app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div([
     html.H1(children='PNW Car Search Dashboard'),
