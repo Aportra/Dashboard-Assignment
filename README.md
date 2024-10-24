@@ -30,7 +30,3 @@ This repository contains a tactical dashboard built using **Python**, **Dash**, 
 - **Pandas**: Data manipulation and analysis library.
 - **Numpy**: Numerical computing library.
 
-## Project Structure
-
-```bash
-
